@@ -1,3 +1,8 @@
+import { getServerState } from "@/lib/atom";
+import HomePage from "./_templates/Home";
+
 export default function Home() {
-  return <div>Hello World</div>;
+  const user = getServerState("user", null);
+  console.log(user);
+  return <HomePage />;
 }

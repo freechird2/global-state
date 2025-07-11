@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 상태 관리 라이브러리 구현
 
-## Getting Started
+## 🏗️ 구조 설명
 
-First, run the development server:
+### Atom 시스템
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- 각 Atom은 독립적인 상태 단위
+- 자체 구독자 관리 (Set<Subscriber>)
+- 값 변경 시 구독자들에게 알림
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 구독 시스템
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `subscribe` 메서드로 구독자 등록
+- `Object.is`를 사용한 값 비교로 불필요한 리렌더링 방지
+- unsubscribe 시 메모리 정리
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### React 연동
 
-## Learn More
+- `useSyncExternalStore` 사용으로 SSR 호환성 확보
+- atom 단위로 컴포넌트 리렌더링 최적화
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ 기술적 선택
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **useSyncExternalStore**: React 18의 권장 방식으로 SSR 호환성 확보
+2. **Object.is 비교**: 참조 동등성으로 정확한 값 비교
+3. **Set 기반 구독자 관리**: O(1) 시간복잡도로 효율적인 구독자 관리
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔄 값 비교 방식
 
-## Deploy on Vercel
+`Object.is(value, newValue)` 사용:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 원시값: 값 비교
+- 객체: 참조 비교
+- 불필요한 리렌더링 방지
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚛️ React 연동 문제 및 해결
+
+**문제**: SSR 환경에서 hydration 불일치
+**해결**: `useSyncExternalStore` 사용으로 서버/클라이언트 상태 동기화
+
+## 🚀 추가 구현 계획
+
+1. **파생 Atom**: 계산된 상태 구현
+2. **비동기 Atom**: Promise 기반 상태 관리
+3. **배치 업데이트**: 여러 atom 동시 업데이트 최적화
